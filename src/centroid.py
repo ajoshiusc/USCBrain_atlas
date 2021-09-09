@@ -367,7 +367,7 @@ def affinity_mat(rho):
     return (np.exp((-2.0*(1-rho))/(.72 ** 2)))
 
 def mapping(refined_roilists,roilist_count,current_label_id,current_color):
-    keys = refined_roilists.viewkeys()
+    keys = refined_roilists.keys()
     if current_label_id in keys :
         return roilist_count
     refined_roilists[current_label_id]=current_color

@@ -16,7 +16,7 @@ left_hemisphere=np.array([227,169,185,447,331,165,443,329,173,445,131,425,167,32
 #intensity_file_ttransverse temporal gyrus_325_nCluster=1_BCI
 nClusters=np.array([3,1,3,2,2,2,3,3,2,2,2,3,1,4,1,2,1,3,2,1,4,2,1,2,2,2,2,3,1,2,1,2])
 scan_type=['left','right']
-p_dir='/big_disk/ajoshi/cortical_parcellation'
+p_dir='.'
 
 def plot_figure(dfs_left,labels):
     from mayavi import mlab
@@ -49,7 +49,7 @@ for hemi in range(0,2):
             roilist=right_hemisphere[n]
         #print n, roiregion[n], roilist
         msk_small_region = np.in1d(dfs_left.labels, roilist)
-        data=scipy.io.loadmat(os.path.join(p_dir,'src','intensity_mode_map','intensity_file_'+roiregion[n]+'_'+str(roilist)+'_nCluster='+str(nClusters[n])+'_BCI.mat'))
+        data=scipy.io.loadmat(os.path.join(p_dir,'intensity_file_'+roiregion[n]+'_'+str(roilist)+'_nCluster='+str(nClusters[n])+'_BCI.mat'))
         labels[msk_small_region] = roilist*10 + data['labs_all'].flatten()[msk_small_region]
         #plot_figure(dfs_left,labels)
         #fun(data)

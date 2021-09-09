@@ -160,7 +160,7 @@ def box_plot(temp,temp1,map_roilists,fig_name):
         data_to_plot.append(temp[i])
         data_to_plot.append(temp1[i])
     # Create a figure instance
-    save_dir = '/home/sgaurav/Documents/git_sandbox/cortical_parcellation/src'
+    save_dir = '.'
     import scipy as sp
     sp.savez(os.path.join(save_dir, 'rand_index'+scan_type[0] + '.npz'),rand_index=data_to_plot,roilists=map_roilists.values())
     fig = plt.figure(1 )
@@ -295,14 +295,14 @@ def RI_mean(lst):
     map_roilists={}
     for i in range (left_hemisphere.shape[0]):
         map_roilists[left_hemisphere[i]]=roiregion[i]
-    refined_left=readdfs(os.path.join('/home/ajoshi/for_gaurav', '100307.BCI2reduce3.very_smooth.left.dfs'))
+    refined_left=readdfs(os.path.join('/big_disk/ajoshi/coding_ground.donotdelete/hybridatlas/src/', '100307.BCI2reduce3.very_smooth.left.dfs'))
     refined_left=refined_left.labels
-    refined_right = readdfs(os.path.join('/home/ajoshi/for_gaurav', '100307.BCI2reduce3.very_smooth.right.dfs'))
+    refined_right = readdfs(os.path.join('/big_disk/ajoshi/coding_ground.donotdelete/hybridatlas/src/', '100307.BCI2reduce3.very_smooth.right.dfs'))
     refined_right=refined_right.labels
     temp = []
     temp1 = []
     cnt=0
-    for roilist in map_roilists.viewkeys():
+    for roilist in map_roilists:
         #print roilist
         cnt += 1
         # msk_small_region = np.in1d(refined_right,roilist)
@@ -320,7 +320,7 @@ def RI_mean(lst):
     box_plot(temp.tolist(),temp1.tolist(),map_roilists,'60')
 
 from sklearn.metrics import adjusted_rand_score ,adjusted_mutual_info_score
-save_dir = '/home/ajoshi/Desktop/validation'
+save_dir = '.'
 lst = os.listdir(save_dir)
 
 #lst=['101915','106016','108828','122317','125525','136833','138534','147737','148335','156637']
