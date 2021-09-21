@@ -52,8 +52,8 @@ for hemi in range(0,2):
     s.faces=faces
     s.vColor=left_mid['vColor']
     s=patch_color_labels(s,cmap='Paired',shuffle=True)
-    view_patch(s,show=1,colormap='Paired',colorbar=0)
-    save_dir = '.'
+    view_patch(s,show=1,colormap='Paired',colorbar=0,close=0)
+    save_dir = '/ImagePTE1/ajoshi/code_farm/USCBrain_atlas/direct_mapping'
     import scipy as sp
     sp.savez(os.path.join(save_dir, 'direct_mapping'+scan_type[hemi] + '.npz'),
              labels=s.labels, vertices=s.vertices,

@@ -27,7 +27,7 @@ def plot_histogram(nsub,temp,lst):
     cnt=0
     cmaplist[0]=(0.5,0.5,0.5,1.0)
     print(temp.__len__())
-    for i in range(0,temp.__len__()/4):
+    for i in range(0,len(temp)/4):
         cmaplist[cnt] = cmap(i)
         cmaplist[cnt+1] = cmap(i)
         cmaplist[cnt+2] = cmap(i)
@@ -143,13 +143,13 @@ def plot_fmri_subject(lst):
             sc = patch_color_labels(sc, cmap='Paired', shuffle=True)
             view_patch(sc, show=1, colormap='Paired', colorbar=0)
 
-def box_plot(temp,temp1,map_roilists,fig_name):
+def box_plot(temp,temp1,map_roilists,fig_name,scan_type):
     ## numpy is used for creating fake data
     import numpy as np
     import matplotlib as mpl
 
     ## agg backend is used to create plot as a .png file
-    mpl.use('agg')
+    #mpl.use('agg')
 
     import matplotlib.pyplot as plt
 
@@ -161,9 +161,11 @@ def box_plot(temp,temp1,map_roilists,fig_name):
         data_to_plot.append(temp1[i])
     # Create a figure instance
     save_dir = '.'
+
     import scipy as sp
-    sp.savez(os.path.join(save_dir, 'rand_index'+scan_type[0] + '.npz'),rand_index=data_to_plot,roilists=map_roilists.values())
-    fig = plt.figure(1 )
+    sp.savez(os.path.join(save_dir, 'rand_index'+ scan_type + '.npz'),rand_index=data_to_plot,roilists=list(map_roilists.values()))
+    
+    fig = plt.figure(figsize=(20, 10))
 
     # Create an axes instance
     ax = fig.add_subplot(111)
@@ -171,7 +173,7 @@ def box_plot(temp,temp1,map_roilists,fig_name):
     # Create the boxplot
     bp = ax.boxplot(data_to_plot[:32], patch_artist=True, showmeans=True)
 
-    ax.set_title("VALIDATION PLOT  RIGHT HEMISPHERE", fontsize=53, fontweight='bold')
+    ax.set_title('VALIDATION PLOT ' + scan_type +' HEMISPHERE set 1', fontsize=53, fontweight='bold')
     plt.subplots_adjust(left=0.06, right=0.96, top=0.90, bottom=0.09)
     ax.set_xlabel("nSubjects "+str(fig_name)+"( Direct_to_session followed by session_to_session )", fontsize=30, fontweight='bold')
     ax.set_ylabel("RAND INDEX", fontsize=20, fontweight='bold')
@@ -191,7 +193,7 @@ def box_plot(temp,temp1,map_roilists,fig_name):
         patch.set_facecolor(color)
     import matplotlib.patches as mpatches
     cnt=0
-    for roilist in map_roilists.viewkeys():
+    for roilist in map_roilists.keys():
         if cnt == 0:
             handles = [mpatches.Patch(color=Colors[cnt], label=map_roilists[roilist])]
             # handles += [mpatches.Patch(color=colors[cnt], label= map_roilists[roilist])]
@@ -235,16 +237,94 @@ def box_plot(temp,temp1,map_roilists,fig_name):
     #plt.legend(handles=[NA, NA1,EU,EU1, AP,AP1, SA,SA1,AA, AA1, AU1,AU,AU2,AU3], loc=2, ncol=4)
     plt.legend(handles=handles[:16], loc=2, ncol=5)
     plt.show()
-    fig.savefig('fig'+str(fig_name)+'.png', bbox_inches='tight')
+    fig.savefig('fig'+str(fig_name)+'_1.png', bbox_inches='tight')
     plt.close()
+
+
+    fig = plt.figure(figsize=(20, 10))
+
+    # Create an axes instance
+    ax = fig.add_subplot(111)
+
+    # Create the boxplot
+    bp = ax.boxplot(data_to_plot[32:], patch_artist=True, showmeans=True)
+
+    ax.set_title('VALIDATION PLOT ' + scan_type +' HEMISPHERE set 2', fontsize=53, fontweight='bold')
+    plt.subplots_adjust(left=0.06, right=0.96, top=0.90, bottom=0.09)
+    ax.set_xlabel("nSubjects "+str(fig_name)+"( Direct_to_session followed by session_to_session )", fontsize=30, fontweight='bold')
+    ax.set_ylabel("RAND INDEX", fontsize=20, fontweight='bold')
+    ax.set_ylim(0, 1.3)
+    #colors = ['cyan','cyan', 'lightblue','lightblue', 'lightgreen','lightgreen', 'tan','tan', 'pink','pink','#7570b3','#7570b3', '#F78F1E','#F78F1E', '#BE3224','#BE3224',
+             #'#F78F1E','#F78F1E', '#BE3224','#BE3224','#A78F1E','#A78F1E','m','m' ]
+    Colors = ['cyan','#F78F1E', 'lightblue','y', 'lightgreen','#F78F1E', 'tan','#AEF2F4', 'pink', '#A78F1E', '#7570b3',  'm', 'k','#E78F1E','#BEF2F4','blue']
+    Colors=np.tile(Colors,2)
+    colors=[0 for i in range(2*Colors.__len__())]
+    cnt=0
+    for c in range(Colors.__len__()):
+        colors[cnt]=Colors[c]
+        colors[cnt+1]=Colors[c]
+        cnt+=2
+    colors = np.tile(colors, 6)
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
+    import matplotlib.patches as mpatches
+    cnt=0
+    for roilist in map_roilists.keys():
+        if cnt == 0:
+            handles = [mpatches.Patch(color=Colors[cnt], label=map_roilists[roilist])]
+            # handles += [mpatches.Patch(color=colors[cnt], label= map_roilists[roilist])]
+        else:
+            handles += [mpatches.Patch(color=Colors[cnt], label=map_roilists[roilist])]
+            # handles += [mpatches.Patch(color=colors[cnt], label= map_roilists[roilist])]
+        cnt += 1
+
+
+    ## change color and linewidth of the whiskers
+    for whisker in bp['whiskers']:
+        whisker.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the caps
+    for cap in bp['caps']:
+        cap.set(color='#7570b3', linewidth=2)
+
+    ## change color and linewidth of the medians
+    for median in bp['medians']:
+        median.set(color='green', linewidth=2)
+
+    ## change the style of fliers and their fill
+    for flier in bp['fliers']:
+        flier.set(marker='o', color='#e7298a', alpha=0.5)
+
+    # Save the figure
+    '''plt.figtext(0.80, 0.08, ' superior frontal gyrus', color='cyan', weight='roman',
+                size='x-small')
+
+
+    plt.figtext(0.80, 0.045, 'pre-central gyrus',
+                color='lightblue', weight='roman', size='x-small')
+    plt.figtext(0.80, 0.015, 'angular gyrus', color='lightgreen', backgroundcolor='silver',
+                weight='roman', size='medium')
+    plt.figtext(0.815, 0.013, 'superior parietal gyrus', color='tan', weight='roman',
+                size='x-small')
+    plt.figtext(0.815, 0.010, 'pre-cuneus', color='pink', weight='roman',
+                size='x-small')
+    plt.figtext(0.815, 0.010, 'Insula', color='#7570b3', weight='roman',
+                size='x-small')'''
+    #plt.legend(handles=[NA, NA1,EU,EU1, AP,AP1, SA,SA1,AA, AA1, AU1,AU,AU2,AU3], loc=2, ncol=4)
+    plt.legend(handles=handles[16:], loc=2, ncol=5)
+    plt.show()
+    fig.savefig('fig'+str(fig_name)+'_2.png', bbox_inches='tight')
+    plt.close()
+
 
 def session_to_session(msk,scan_type,sub_lst):
     lst=[]
+    save_dir = '/ImagePTE1/ajoshi/code_farm/USCBrain_atlas/validation/' + scan_type
     cnt=0
     count=[3,2,1,4]
     sub_lst=sorted(sub_lst)
     for sub in sub_lst:
-        if not ((sub.startswith('direct_mapping')) or sub[7:8] =='r'):
+        if not (sub.startswith('s') or sub.startswith('d')):
             #print sub[:6]
             if cnt%4 ==0:
                 cnt=0
@@ -255,6 +335,7 @@ def session_to_session(msk,scan_type,sub_lst):
                 fmri2 = np.load(os.path.join(save_dir, str(sub_lst[sub_lst.index(sub)+1])))
                 fmri2_labels = fmri2['labels'][msk]
                 lst.append(adjusted_rand_score(fmri1_labels, fmri2_labels))
+                print(sub,sub_lst[sub_lst.index(sub)+1],len(np.unique(fmri1_labels)),len(np.unique(fmri2_labels)))
     ''''a=np.arange(lst.__len__())
     lst1=[[]]
     for i in range(6):
@@ -265,16 +346,16 @@ def session_to_session(msk,scan_type,sub_lst):
 
 def dir_session(msk,scan_type,sub_lst):
     lst1=[[]]
+    save_dir = '/ImagePTE1/ajoshi/code_farm/USCBrain_atlas/validation/' + scan_type
     lst=[]
     cnt=0
-    direct = np.load(os.path.join(save_dir, 'direct_mapping' + scan_type + '.npz'))
+    direct = np.load(os.path.join(direct_mapping_dir, 'direct_mapping' + scan_type + '.npz'))
     dir_labels = direct['labels'][msk]
     for sub in sub_lst:
         cnt+=1
-        if not ((sub.startswith('direct_mapping')) or sub[7:8] =='r'):
-            fmri = np.load(os.path.join(save_dir, str(sub) ))
-            fmri_labels = fmri['labels'][msk]
-            lst.append(adjusted_rand_score(dir_labels, fmri_labels))
+        fmri = np.load(os.path.join(save_dir, str(sub) ))
+        fmri_labels = fmri['labels'][msk]
+        lst.append(adjusted_rand_score(dir_labels, fmri_labels))
     '''a = np.arange(lst.__len__())
     for i in range(4):
         msk = a % 4 == i
@@ -282,7 +363,7 @@ def dir_session(msk,scan_type,sub_lst):
     return np.array(lst1[1:])'''
     return np.array(lst)
 
-def RI_mean(lst):
+def RI_mean(lst_left,lst_right):
     import scipy as sp
     roilists=[]
     scan_type = ['left', 'right']
@@ -309,20 +390,47 @@ def RI_mean(lst):
         msk_small_region = np.in1d(refined_left, roilist)
         if temp.__len__() > 0:
             # temp = sp.vstack([calculate_mean(msk_small_region, sub, scan_type[1]), temp])
-            temp = sp.vstack([dir_session(msk_small_region, scan_type[0],lst), temp])
-            temp1 = sp.vstack([session_to_session(msk_small_region, scan_type[0],lst), temp1])
+            temp = sp.vstack([temp, dir_session(msk_small_region, scan_type[0],lst_left)])
+            temp1 = sp.vstack([temp1, session_to_session(msk_small_region, scan_type[0],lst_left)])
         else:
             # temp=calculate_mean(msk_small_region,sub,scan_type[1])
-            temp = dir_session(msk_small_region, scan_type[0],lst)
-            temp1 = session_to_session(msk_small_region, scan_type[0],lst)
+            temp = dir_session(msk_small_region, scan_type[0],lst_left)
+            temp1 = session_to_session(msk_small_region, scan_type[0],lst_left)
             # msk_small_region = np.in1d(refined_left, roilist+1)
             # temp=sp.vstack([calculate_mean(msk_small_region,sub,scan_type[0]),temp])
-    box_plot(temp.tolist(),temp1.tolist(),map_roilists,'60')
+    box_plot(temp.tolist(),temp1.tolist(),map_roilists,'left_60',scan_type[0])
+
+
+    map_roilists={}
+    for i in range (right_hemisphere.shape[0]):
+        map_roilists[right_hemisphere[i]]=roiregion[i]
+
+    temp = []
+    temp1 = []
+    cnt=0
+    for roilist in map_roilists:
+        #print roilist
+        cnt += 1
+        # msk_small_region = np.in1d(refined_right,roilist)
+        msk_small_region = np.in1d(refined_right, roilist)
+        if temp.__len__() > 0:
+            # temp = sp.vstack([calculate_mean(msk_small_region, sub, scan_type[1]), temp])
+            temp = sp.vstack([temp, dir_session(msk_small_region, scan_type[1],lst_right)])
+            temp1 = sp.vstack([temp1, session_to_session(msk_small_region, scan_type[1],lst_right)])
+        else:
+            # temp=calculate_mean(msk_small_region,sub,scan_type[1])
+            temp = dir_session(msk_small_region, scan_type[1],lst_right)
+            temp1 = session_to_session(msk_small_region, scan_type[1],lst_right)
+            # msk_small_region = np.in1d(refined_left, roilist+1)
+            # temp=sp.vstack([calculate_mean(msk_small_region,sub,scan_type[0]),temp])
+    box_plot(temp.tolist(),temp1.tolist(),map_roilists,'right_60',scan_type[1])
+
 
 from sklearn.metrics import adjusted_rand_score ,adjusted_mutual_info_score
-save_dir = '.'
-lst = os.listdir(save_dir)
+lst_left = os.listdir('/ImagePTE1/ajoshi/code_farm/USCBrain_atlas/validation/left')
+lst_right = os.listdir('/ImagePTE1/ajoshi/code_farm/USCBrain_atlas/validation/right')
 
+direct_mapping_dir='/ImagePTE1/ajoshi/code_farm/USCBrain_atlas/direct_mapping'
 #lst=['101915','106016','108828','122317','125525','136833','138534','147737','148335','156637']
 
 sdir=['_RL','_LR']
@@ -330,24 +438,27 @@ scan_type=['left','right']
 session_type=[1,2]
 temp=[]
 #box_plot()
-RI_mean(lst)
+RI_mean(lst_left,lst_right)
+
+""" 
 for sub in lst:
-    #if not (sub.startswith('direct_mapping')):
+    if not (sub.startswith('direct_mapping')):
         for hemi in range(0,2):
-            direct= np.load(os.path.join(save_dir, 'direct_mapping'+scan_type[hemi] + '.npz'))
+            direct= np.load(os.path.join(direct_mapping_dir, 'direct_mapping'+scan_type[hemi] + '.npz'))
             dir_labels = direct['labels']
-            for scan in range(0,4):
-                 fmri= np.load(os.path.join(save_dir, str(sub) + '_' + scan_type[hemi]  + sdir[scan/2] + '_' + str(session_type[scan%2]) + '.npz' ))
-                 fmri_labels = fmri['labels']
-                 temp.append(adjusted_mutual_info_score(dir_labels,fmri_labels))
-            for scan1 in range(0, 4):
-                fmri1 = np.load(os.path.join(save_dir,  str(sub) + '_' + scan_type[hemi]  + sdir[scan1/2] + '_' + str(session_type[scan1%2]) + '.npz'))
-                fmri1_labels = fmri1['labels']
-                for scan2 in range(scan1 + 1, 4):
-                    fmri2 = np.load(os.path.join(save_dir, str(sub) + '_' + scan_type[hemi]  + sdir[scan2/2] + '_' + str(session_type[scan2%2]) + '.npz'))
-                    fmri2_labels = fmri2['labels']
-                    if adjusted_rand_score(fmri1_labels, fmri2_labels) > 0:
-                        temp.append(adjusted_mutual_info_score(fmri1_labels, fmri2_labels))
+            if not (sub.startswith('s') or sub.startswith('d')):
+                for scan in range(0,4):
+                    fmri= np.load(os.path.join(save_dir, str(sub[:6]) + '_' + scan_type[hemi]  + sdir[int(np.floor(scan/2))] + '_' + str(session_type[scan%2]) + '.npz' ))
+                    fmri_labels = fmri['labels']
+                    temp.append(adjusted_mutual_info_score(dir_labels,fmri_labels))
+                for scan1 in range(0, 4):
+                    fmri1 = np.load(os.path.join(save_dir,  str(sub[:6]) + '_' + scan_type[hemi]  + sdir[int(np.floor(scan1/2))] + '_' + str(session_type[scan1%2]) + '.npz'))
+                    fmri1_labels = fmri1['labels']
+                    for scan2 in range(scan1 + 1, 4):
+                        fmri2 = np.load(os.path.join(save_dir, str(sub[:6]) + '_' + scan_type[hemi]  + sdir[int(np.floor(scan2/2))] + '_' + str(session_type[scan2%2]) + '.npz'))
+                        fmri2_labels = fmri2['labels']
+                        if adjusted_rand_score(fmri1_labels, fmri2_labels) > 0:
+                            temp.append(adjusted_mutual_info_score(fmri1_labels, fmri2_labels))
             temp.append(0)
         temp.append(0)
 temp.append(0)
@@ -357,4 +468,4 @@ sp.savez(
     os.path.join(save_dir, 'sub_and_rand-index_data.npz'),
     rand_index=temp,subjects=lst)
 nsub=lst.__len__()
-plot_histogram(nsub,temp,lst)
+plot_histogram(nsub,temp,lst) """
