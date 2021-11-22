@@ -4,6 +4,7 @@ from copy import deepcopy, copy
 from dfsio import readdfs
 from statsmodels.stats.weightstats import CompareMeans as cms
 from surfproc import patch_color_attrib, patch_color_labels, view_patch, view_patch_vtk
+from fmri_methods_sipi import reduce3_to_bci_lh, reduce3_to_bci_rh
 
 
 roiregion = ['angular gyrus', 'anterior orbito-frontal gyrus', 'cingulate', 'cuneus', 'fusiforme gyrus', 'gyrus rectus', 'inferior occipital gyrus', 'inferior temporal gyrus', 'lateral orbito-frontal gyrus', 'lingual gyrus',
@@ -28,6 +29,8 @@ for hemi in ['left', 'right']:
 
     zscore = readdfs(os.path.join('/big_disk/ajoshi/coding_ground.donotdelete/hybridatlas/src/',
                                   '100307.BCI2reduce3.very_smooth.'+hemi+'.dfs'))
+    zscore = readdfs('/data_disk/HCP_data/reference.old/100307.aparc.a2009s.32k_fs.reduce3.very_smooth.'+hemi+'.dfs')                              
+
 
     direct.attributes = np.ones(direct.vertices.shape[0])
     sessions.attributes = np.ones(sessions.vertices.shape[0])
@@ -50,14 +53,44 @@ for hemi in ['left', 'right']:
         # z-score computation
         sd1 = np.std(rand_indices[2*i])
         sd2 = np.std(rand_indices[2*i+1])
-        pooledSE = np.sqrt(sd1**2/len(rand_indices[2*i]) + sd2**2/len(rand_indices[2*i+1]))
-        zscore.attributes[msk_small_region] = (np.mean(rand_indices[2*i+1] - np.mean(rand_indices[2*i])))/(pooledSE+1e-6)
+        #pooledSE = np.sqrt(sd1**2/len(rand_indices[2*i]) + sd2**2/len(rand_indices[2*i+1]))
+        pooledSD = np.sqrt((sd1**2*(len(rand_indices[2*i])-1) + sd2**2*(len(rand_indices[2*i+1])-1))/(len(rand_indices)-2))
+
+        zscore.attributes[msk_small_region] = (np.mean(rand_indices[2*i+1] - np.mean(rand_indices[2*i])))/(pooledSD+1e-6)
         #cms(100,100).ztest_ind(np.array(rand_indices[2*i]),np.array(rand_indices[2*i+1]))
         #
 
-    patch_color_attrib(direct, cmap='jet', clim=[0, 1])
-    patch_color_attrib(sessions, cmap='jet', clim=[0, 1])
-    patch_color_attrib(zscore, cmap='jet', clim=[0, 6])
+    if hemi == 'left':
+        att = reduce3_to_bci_lh(direct.attributes)
+        direct = readdfs('/ImagePTE1/ajoshi/code_farm/svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs')
+        direct.attributes = att
+
+        att = reduce3_to_bci_lh(sessions.attributes)
+        sessions = readdfs('/ImagePTE1/ajoshi/code_farm/svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs')
+        sessions.attributes = att
+
+        att = reduce3_to_bci_lh(zscore.attributes)
+        zscore = readdfs('/ImagePTE1/ajoshi/code_farm/svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.left.mid.cortex.dfs')
+        zscore.attributes = att
+
+
+    else:
+        att = reduce3_to_bci_rh(direct.attributes)
+        direct = readdfs('/ImagePTE1/ajoshi/code_farm/svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs')
+        direct.attributes = att
+
+        att = reduce3_to_bci_rh(sessions.attributes)
+        sessions = readdfs('/ImagePTE1/ajoshi/code_farm/svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs')
+        sessions.attributes = att
+
+        att = reduce3_to_bci_rh(zscore.attributes)
+        zscore = readdfs('/ImagePTE1/ajoshi/code_farm/svreg/BCI-DNI_brain_atlas/BCI-DNI_brain.right.mid.cortex.dfs')
+        zscore.attributes = att
+
+
+    patch_color_attrib(direct, cmap='hot', clim=[0, 1])
+    patch_color_attrib(sessions, cmap='hot', clim=[0, 1])
+    patch_color_attrib(zscore, cmap='hot', clim=[0, 1])
 
     view_patch_vtk(direct, azimuth=-100,  elevation=180, roll=-90,
                    outfile=hemi+'_rand_index_direct_mapping_1.png')

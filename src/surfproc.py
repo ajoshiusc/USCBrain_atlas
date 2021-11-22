@@ -329,6 +329,7 @@ def view_patch_vtk(r, azimuth=90, elevation=0, roll=-90, outfile=0, show=1):
     ro = r
     r = createPolyData(r.vertices, r.faces)
 
+
     Colors = vtkUnsignedCharArray()
     Colors.SetNumberOfComponents(3)
     Colors.SetName("Colors")
@@ -349,6 +350,8 @@ def view_patch_vtk(r, azimuth=90, elevation=0, roll=-90, outfile=0, show=1):
 
     actor = vtkActor()
     actor.SetMapper(mapper)
+    #actor.GetProperty().SetSpecular(.3)
+
 #    actor.GetProperty().SetInterpolationToPhong()
     normals = vtkPolyDataNormals()
     normals.SetInputData(r)
